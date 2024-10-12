@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VR Scene con Imagen de Alta Calidad</title>
+    <title>VR Bosi</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-gif-shader@master/dist/aframe-gif-shader.min.js"></script>
     <style>
@@ -38,15 +38,26 @@
         segments-width="64"
       ></a-sky>
 
-      <a-box id="evento1" class="collidable"position="0 1.5 -3"width="0.7"height="0.3"depth="0.2"color="green">
-        <a-text value="Evento1" position="0 0 0.1" align="center" color="black" width="4"></a-text>
+      <a-box id="evento1" class="collidable"position="0 1.5 -3"width="0.9"height="0.3"depth="0.2"color="green">
+        <a-text value="Situacion 1" position="0 0 0.1" align="center" color="black" width="4"></a-text>
       </a-box>
       
 
-      <a-box id="grabar"class="collidable"position="0 1 -3"width="0.7"height="0.3"depth="0.2"color="red"visible="false">
+      <a-box id="grabar"class="collidable"position="0 1 -3"width="0.9"height="0.3"depth="0.2"color="red"visible="false">
         <a-text value="Grabar" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
       </a-box>
       
+      <a-box id="stop"class="collidable"position="1 1 -3"width="0.9"height="0.3"depth="0.2"color="blue"visible="false">
+        <a-text value="Detener" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
+      </a-box>
+
+      <a-box id="transcribir"class="collidable"position="2 1 -3"width="0.9"height="0.3"depth="0.2"color="yellow"visible="false">
+        <a-text value="Transcribir" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
+      </a-box>
+
+      <a-box id="resultado"class="collidable"position="0 2 -3"width="0.9"height="0.3"depth="0.2"color="yellow"visible="false">
+        <a-text value="Resultado" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
+      </a-box>
 
       <a-camera>
         <a-cursor raycaster="objects: .collidable"></a-cursor>
@@ -54,6 +65,8 @@
     </a-scene>
 
     <script>
+      let mediaRecorder;
+
       function startVR() {
         document.getElementById("vrScene").style.display = "block";
         document.getElementById("startButton").style.display = "none";
@@ -69,7 +82,7 @@
         img.src = "./img/bosipost.jpg";
       });
 
-      let intersected = false;
+      /* let intersected = false;
       let timer;
 
       function startTimer() {
@@ -79,6 +92,18 @@
 
           let grabarText = document.querySelector('a-text[value="Grabar"]');
           grabarText.setAttribute('visible', 'true');
+
+          let stopButton = document.getElementById('stop');
+          stopButton.setAttribute('visible', 'true');
+
+          let stopText = document.querySelector('a-text[value="Detener"]');
+          stopText.setAttribute('visible', 'true');
+
+          let transcribirButton = document.getElementById('transcribir');
+          transcribirButton.setAttribute('visible', 'true');
+
+          let transcribirText = document.querySelector('a-text[value="Transcribir"]');
+          transcribirText.setAttribute('visible', 'true'); 
         }, 3000); // 3 segundos
       }
 
@@ -102,9 +127,128 @@
             stopTimer();
           });
         }
-      });
+      }); */
 
-      document.getElementById('evento1').setAttribute('button-listener', '');
+      //document.getElementById('evento1').setAttribute('button-listener', '');
+      function actualizarResultado(texto) {
+        let resultadoText = document.querySelector('a-box#resultado a-text');
+        resultadoText.setAttribute('value', texto); // Actualiza el texto dentro del box con id="resultado"
+      }
+
+      function showButtons() {
+        // Muestra los botones de grabar, detener y transcribir
+        document.getElementById("grabar").setAttribute("visible", "true");
+        document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "true");
+
+        document.getElementById("stop").setAttribute("visible", "true");
+        document.querySelector('a-text[value="Detener"]').setAttribute("visible", "true");
+
+        document.getElementById("transcribir").setAttribute("visible", "true");
+        document.querySelector('a-text[value="Transcribir"]').setAttribute("visible", "true");
+
+        document.getElementById("resultado").setAttribute("visible", "true");
+        document.querySelector('a-text[value="Resultado"]').setAttribute("visible", "true");
+      }
+
+      async function grabar() {
+
+        actualizarResultado('Grabación iniciada...');
+        audioChunks =[];
+            
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+
+                // Enviar audio al servidor
+                fetch('https://flask-idenpala-1fe342925a36.herokuapp.com/grabar', {
+                  method: 'POST',
+                  body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'grabacion_completada') {
+                      // document.getElementById("grabar").setAttribute("visible", "false");
+                      // document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "false");
+                      console.log ("Grabacion enviada para procesamiento");
+                      actualizarResultado('Grabación enviada para procesamiento...');
+                        
+                    } else {
+                        console.log("Error en la grabación.");
+                        actualizarResultado('Error en la grabación.');
+                    }
+                });
+            };
+
+            mediaRecorder.start();
+            console.log("Grabación iniciada...");
+      }
+
+      function detener() {
+        console.log("Detener grabación");
+        mediaRecorder.stop();
+        actualizarResultado('Grabación detenida.');
+      }
+
+      function transcribir() {
+        console.log("Iniciar transcripción");
+        actualizarResultado('Transcripción en proceso...');
+        fetch('https://flask-idenpala-1fe342925a36.herokuapp.com/transcribir', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                      let textoReconocido = `Texto reconocido: ${data.texto_reconocido}`;
+                      let resultado = `Resultado: ${data.resultado}`;
+                      actualizarResultado(`${textoReconocido}\n${resultado}`);
+
+                            console.log(data.texto_reconocido)
+                            console.log(data.resultado);
+                    } else {
+                        console.log(data.message);
+                        actualizarResultado(`Error: ${data.message}`);
+                    }
+                });
+      }
+
+      function setupRaycasterComponent(buttonId, action) {
+        let intersected = false;
+        let timer;
+
+        AFRAME.registerComponent(buttonId + '-listener', {
+          init: function () {
+            let el = this.el;
+            el.addEventListener('raycaster-intersected', function () {
+              if (!intersected) {
+                intersected = true;
+                timer = setTimeout(() => {
+                  action(); // Ejecuta la acción pasada como argumento
+                }, 3000); // 3 segundos de espera
+              }
+            });
+
+            el.addEventListener('raycaster-intersected-cleared', function () {
+              intersected = false;
+              clearTimeout(timer); // Detiene el temporizador si se quita el cursor
+            });
+          }
+        });
+
+        document.getElementById(buttonId).setAttribute(buttonId + '-listener', '');
+      }
+
+      // Asignar las funciones a cada botón
+      setupRaycasterComponent('evento1', showButtons);
+      setupRaycasterComponent('grabar', grabar);
+      setupRaycasterComponent('stop', detener);
+      setupRaycasterComponent('transcribir', transcribir);
+      
     </script>
   </body>
 </html>
