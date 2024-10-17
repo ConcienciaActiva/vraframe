@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VR Bosi</title>
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/mayognaise/aframe-gif-shader@master/dist/aframe-gif-shader.min.js"></script>
     <style>
       #startButton {
@@ -20,44 +20,44 @@
   </head>
 
   <body>
-    <button id="startButton" onclick="startVR()">Comenzar VR</button>
+    <button id="startButton" onclick="startVR()">Continuar</button>
 
     <a-scene id="vrScene" style="display: none" vr-mode-ui="enabled: true">
       <a-assets>
-        <img id="skyTexture" src="./img/bosipost.jpg" crossorigin="anonymous" />
+        <img id="skyTexture" src="./img/bosibig.png" crossorigin="anonymous" />
+        <!-- <a-asset-item id="person" src="./3d/scene.gltf"></a-asset-item> -->
+        <a-asset-item id="person1" src="./3d/scene.gltf"></a-asset-item>
+        <a-asset-item id="client" src="./3d/Walking.fbx"></a-asset-item>
       </a-assets>
 
-      <a-sky
-        src="#skyTexture"
-        phi-start="0"
-        phi-length="360"
-        theta-start="0"
-        theta-length="180"
-        radius="5000"
-        segments-height="64"
-        segments-width="64"
-      ></a-sky>
-
-      <a-box id="evento1" class="collidable"position="0 1.5 -3"width="0.9"height="0.3"depth="0.2"color="green">
-        <a-text value="Situacion 1" position="0 0 0.1" align="center" color="black" width="4"></a-text>
+      <a-sky src="#skyTexture" phi-start="0" phi-length="360" theta-start="0" theta-length="180" radius="5000" segments-height="64" segments-width="64"></a-sky>
+      
+      <a-box id="tab" class=""position="0 1 -5"width="5"height="5"depth="0.2"color="white"></a-box>
+      <a-box id="evento1" class="collidable"position="0 2 -3"width="0.9"height="0.3"depth="0.2"color="red">
+        <a-text value="Iniciar" position="0 0 0.1" align="center" color="black" width="4" ></a-text>
       </a-box>
       
-
-      <a-box id="grabar"class="collidable"position="0 1 -3"width="0.9"height="0.3"depth="0.2"color="red"visible="false">
+      <a-box id="grabar"class=""position="-1 1 -3"width="0.9"height="0.3"depth="0.2"color="red"visible="false">
         <a-text value="Grabar" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
       </a-box>
       
-      <a-box id="stop"class="collidable"position="1 1 -3"width="0.9"height="0.3"depth="0.2"color="blue"visible="false">
+      <a-box id="stop"class=""position="0 1 -3"width="0.9"height="0.3"depth="0.2"color="red"visible="false">
         <a-text value="Detener" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
       </a-box>
 
-      <a-box id="transcribir"class="collidable"position="2 1 -3"width="0.9"height="0.3"depth="0.2"color="yellow"visible="false">
-        <a-text value="Transcribir" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
+      <a-box id="transcribir"class=""position="1 1 -3"width="0.9"height="0.3"depth="0.2"color="red"visible="false">
+        <a-text value="Enviar" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
       </a-box>
 
-      <a-box id="resultado"class="collidable"position="0 2 -3"width="0.9"height="0.3"depth="0.2"color="yellow"visible="false">
+      <a-box id="resultado"class=""position="0 0.2 -3"width="1.8"height="0.3"depth="0.2"color="red"visible="false">
         <a-text value="Resultado" position="0 0 0.1" align="center" color="black" width="4" visible="false"></a-text>
       </a-box>
+
+      <!-- <a-entity geometry="primitive:plane;" material="shader:gif;src:url(./img/gif4-1.gif);opacity:0.9;" position ="1 0 0.5"></a-entity> -->
+
+      <!-- <a-entity id="cliente" gltf-model="#person1" scale ="3 3 3" position="10 0 -2" rotation="0 -90 0"visible="false"></a-entity>  -->
+
+      <!-- <a-entity gltf-model="#person1" position="0 0 0" scale="3 3 3" animation="property: position; to: 50 0 -5; dur: 3000; easing: easeInOutQuad; loop: false"> </a-entity> -->
 
       <a-camera>
         <a-cursor raycaster="objects: .collidable"></a-cursor>
@@ -66,93 +66,146 @@
 
     <script>
       let mediaRecorder;
+      let modelo = document.getElementById('cliente');
+      let evento1Button = document.getElementById("evento1");
+      let grabarButton = document.getElementById("grabar");
+      let stopButton = document.getElementById("stop");
+      let resultadoText = document.querySelector('a-box#resultado a-text');
+
+      let transcribirButton = document.getElementById("transcribir");
 
       function startVR() {
         document.getElementById("vrScene").style.display = "block";
-        document.getElementById("startButton").style.display = "none";
+        document.getElementById("startButton").style.display = "none"; 
       }
 
-      // Precargar la imagen
       window.addEventListener("load", function () {
         var sky = document.querySelector("a-sky");
         var img = new Image();
         img.onload = function () {
           sky.setAttribute("src", img.src);
         };
-        img.src = "./img/bosipost.jpg";
+        img.src = "./img/bosibig.png";
       });
 
-      /* let intersected = false;
-      let timer;
+      function moverModelo3D() {
+        
+        modelo.setAttribute('animation', {
+          property: 'position',
+          to: '3 0 -2', // Posición final
+          dur: 7000, // Duración en milisegundos
+          easing: 'linear'
+        });
+        console.log("Animación iniciada");
 
-      function startTimer() {
-        timer = setTimeout(() => {
-          let grabarButton = document.getElementById('grabar');
-          grabarButton.setAttribute('visible', 'true');
-
-          let grabarText = document.querySelector('a-text[value="Grabar"]');
-          grabarText.setAttribute('visible', 'true');
-
-          let stopButton = document.getElementById('stop');
-          stopButton.setAttribute('visible', 'true');
-
-          let stopText = document.querySelector('a-text[value="Detener"]');
-          stopText.setAttribute('visible', 'true');
-
-          let transcribirButton = document.getElementById('transcribir');
-          transcribirButton.setAttribute('visible', 'true');
-
-          let transcribirText = document.querySelector('a-text[value="Transcribir"]');
-          transcribirText.setAttribute('visible', 'true'); 
-        }, 3000); // 3 segundos
+        // modelo.addEventListener('animationcomplete', function () {
+        //   reproducirAudio('./audios/Crea3.mp3'); // Llamamos a la función de audio
+        // });
       }
 
-      function stopTimer() {
-        clearTimeout(timer);
+      function reproducirAudio() {
+        // let audio = new Audio(urlAudio);
+        // audio.play();
+
+         // Reproducir el primer audio (Crea1)
+        let audio1 = new Audio('./audios/Crea1.mp3');
+        audio1.play();
+        
+        // Al terminar el primer audio (Crea1), reproducir el segundo audio (Crea2)
+        audio1.addEventListener('ended', function () {
+          console.log("Crea1 ha terminado. Reproduciendo Crea2...");
+          let audio2 = new Audio('./audios/Crea2.mp3');
+          audio2.play();
+          //moverModelo3D();
+
+          // Al terminar el segundo audio (Crea2), reproducir el tercer audio (Vendedor)
+          audio2.addEventListener('ended', function () {
+            console.log("Crea2 ha terminado. Reproduciendo Vendedor...");
+            
+            let audio3 = new Audio('./audios/Vendedor-2.mp3');
+            audio3.play();
+            // Puedes seguir añadiendo más eventos "ended" si necesitas reproducir más audios en secuencia
+            audio3.addEventListener('ended', function () {
+              console.log("Vendedor ha terminado. Reproduciendo Cliente");
+              let audio4 = new Audio('./audios/Cliente-1.mp3');
+              audio4.play();
+             
+              audio4.addEventListener('ended', function () {
+                console.log("Cliente ha terminado. Reproduciendo Crea3")
+                let audio5 = new Audio('./audios/Crea3-1.mp3');
+                audio5.play();
+
+                audio5.addEventListener('ended', function () {
+                  showButtons();
+                });
+              });
+            });
+          });
+        });
       }
-
-      AFRAME.registerComponent('button-listener', {
-        init: function () {
-          let el = this.el;
-
-          el.addEventListener('raycaster-intersected', function () {
-            if (!intersected) {
-              intersected = true;
-              startTimer();
-            }
-          });
-
-          el.addEventListener('raycaster-intersected-cleared', function () {
-            intersected = false;
-            stopTimer();
-          });
-        }
-      }); */
-
-      //document.getElementById('evento1').setAttribute('button-listener', '');
-      function actualizarResultado(texto) {
-        let resultadoText = document.querySelector('a-box#resultado a-text');
+      
+      function actualizarResultado(texto) {        
         resultadoText.setAttribute('value', texto); // Actualiza el texto dentro del box con id="resultado"
+      }
+      
+      function startEvent1(){
+        reproducirAudio('./audios/Crea1.mp3');
+        //modelo.setAttribute("visible", "true");
       }
 
       function showButtons() {
-        // Muestra los botones de grabar, detener y transcribir
-        document.getElementById("grabar").setAttribute("visible", "true");
+       
+        // document.getElementById("grabar").setAttribute("visible", "true");
+        // document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "true");
+
+        // document.getElementById("stop").setAttribute("visible", "true");
+        // document.querySelector('a-text[value="Detener"]').setAttribute("visible", "true");
+
+        // document.getElementById("transcribir").setAttribute("visible", "true");
+        // document.querySelector('a-text[value="Transcribir"]').setAttribute("visible", "true");
+
+        // document.getElementById("resultado").setAttribute("visible", "true");
+        // document.querySelector('a-text[value="Resultado"]').setAttribute("visible", "true");
+
+        
+        grabarButton.setAttribute("visible", "true");
         document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "true");
+        grabarButton.classList.add("collidable");
 
-        document.getElementById("stop").setAttribute("visible", "true");
+        stopButton.setAttribute("visible", "true");
         document.querySelector('a-text[value="Detener"]').setAttribute("visible", "true");
+        stopButton.classList.add("collidable");
 
-        document.getElementById("transcribir").setAttribute("visible", "true");
-        document.querySelector('a-text[value="Transcribir"]').setAttribute("visible", "true");
-
+        // let transcribirButton = document.getElementById("transcribir");
+        // transcribirButton.setAttribute("visible", "true");
+        // document.querySelector('a-text[value="Transcribir"]').setAttribute("visible", "true");
+        // transcribirButton.classList.add("collidable");
+        resultadoText.setAttribute("value", "Resultado");
         document.getElementById("resultado").setAttribute("visible", "true");
-        document.querySelector('a-text[value="Resultado"]').setAttribute("visible", "true");
+        resultadoText.setAttribute("visible","true");
+        transcribirButton.setAttribute("visible", "false");
+        document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
+
+        evento1Button.setAttribute("visible", "false");
+        document.querySelector('a-text[value="Iniciar"]').setAttribute("visible", "false");
+        evento1Button.classList.remove("collidable");
       }
+
+      function hideButtons() {
+      // Remover la clase "collidable" para que el raycaster no los detecte
+
+      grabarButton.setAttribute("visible", "false");
+      document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "true");
+      grabarButton.classList.remove("collidable");
+
+      stopButton.setAttribute("visible", "false");
+      document.querySelector('a-text[value="Detener"]').setAttribute("visible", "true");
+      stopButton.classList.remove("collidable");
+    }
 
       async function grabar() {
 
-        actualizarResultado('Grabación iniciada...');
+        // actualizarResultado('Grabación iniciada...');
         audioChunks =[];
             
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -178,42 +231,67 @@
                       // document.getElementById("grabar").setAttribute("visible", "false");
                       // document.querySelector('a-text[value="Grabar"]').setAttribute("visible", "false");
                       console.log ("Grabacion enviada para procesamiento");
-                      actualizarResultado('Grabación enviada para procesamiento...');
-                        
+                      actualizarResultado('Grabacion Finalizada');
+                      
                     } else {
-                        console.log("Error en la grabación.");
-                        actualizarResultado('Error en la grabación.');
+                      console.log("Error en la grabación.");
+                      //actualizarResultado('Error en la grabación.');
                     }
                 });
             };
 
             mediaRecorder.start();
+            actualizarResultado('Grabacion iniciada');
             console.log("Grabación iniciada...");
       }
 
       function detener() {
         console.log("Detener grabación");
         mediaRecorder.stop();
-        actualizarResultado('Grabación detenida.');
+        actualizarResultado('Grabacion detenida');
+        transcribirButton.setAttribute("visible", "true");
+        document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "true");
+        transcribirButton.classList.add("collidable");
+        hideButtons();
       }
 
       function transcribir() {
+        
         console.log("Iniciar transcripción");
-        actualizarResultado('Transcripción en proceso...');
+        actualizarResultado('Analizando');
+        let resultado;
+        
         fetch('https://flask-idenpala-1fe342925a36.herokuapp.com/transcribir', { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
                       let textoReconocido = `Texto reconocido: ${data.texto_reconocido}`;
-                      let resultado = `Resultado: ${data.resultado}`;
-                      actualizarResultado(`${textoReconocido}\n${resultado}`);
+                      resultado = `Resultado: ${data.resultado}`;
+                      //actualizarResultado(`${textoReconocido}\n${resultado}`);
 
-                            console.log(data.texto_reconocido)
-                            console.log(data.resultado);
+                      console.log(data.texto_reconocido);
+                      console.log(data.resultado);
+                      console.log("ESTE ES EL RESULTADO"+resultado);
+                      if (data.resultado == "Correcto"){
+                        console.log("Reproducinedo correcto ")
+                        let audio6 = new Audio('./audios/Crea4.mp3');
+                        audio6.play();
+                        transcribirButton.setAttribute("visible", "false");
+                        document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
+                      }
+                      else if(data.resultado == 'Incorrecto'){
+                        console.log("Reproducinedo incorrecto ")
+                        let audio7 = new Audio('./audios/Crea5.mp3');
+                        audio7.play();
+                        showButtons();
+                        transcribirButton.setAttribute("visible", "false");
+                        document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
+                      }
                     } else {
                         console.log(data.message);
-                        actualizarResultado(`Error: ${data.message}`);
+                        //actualizarResultado(`Error: ${data.message}`);
                     }
+                 
                 });
       }
 
@@ -243,8 +321,7 @@
         document.getElementById(buttonId).setAttribute(buttonId + '-listener', '');
       }
 
-      // Asignar las funciones a cada botón
-      setupRaycasterComponent('evento1', showButtons);
+      setupRaycasterComponent('evento1', startEvent1);
       setupRaycasterComponent('grabar', grabar);
       setupRaycasterComponent('stop', detener);
       setupRaycasterComponent('transcribir', transcribir);
