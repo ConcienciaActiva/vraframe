@@ -184,6 +184,7 @@
         document.getElementById("resultado").setAttribute("visible", "true");
         resultadoText.setAttribute("visible","true");
         transcribirButton.setAttribute("visible", "false");
+        transcribirButton.classList.remove("collidable");
         document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
 
         evento1Button.setAttribute("visible", "false");
@@ -277,6 +278,7 @@
                         let audio6 = new Audio('./audios/Crea4.mp3');
                         audio6.play();
                         transcribirButton.setAttribute("visible", "false");
+                        transcribirButton.classList.remove("collidable");
                         document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
                       }
                       else if(data.resultado == 'Incorrecto'){
@@ -285,6 +287,7 @@
                         audio7.play();
                         showButtons();
                         transcribirButton.setAttribute("visible", "false");
+                        transcribirButton.classList.remove("collidable");
                         document.querySelector('a-text[value="Enviar"]').setAttribute("visible", "false");
                       }
                     } else {
